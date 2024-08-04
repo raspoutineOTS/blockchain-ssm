@@ -349,3 +349,16 @@ Result
 ------
   Returns the successive session states with the corresponding transaction ids.
 ```
+## New Features
+- **AI Integration for SVD Process**: Enhanced project initiation, monitoring, and impact verification using AI.
+- **Blockchain-Based ITMO Data Commoditization**: Framework for ITMO data standardization and commoditization using Hyperledger Fabric.
+- **LLM-Assisted Norm Implementation**: Accelerated norm translation and adaptation through LLM integration.
+
+### AI Integration
+To use the AI integration features, refer to `ai_integration.py`.
+
+### Blockchain-Based ITMO Data Commoditization
+For details on ITMO data commoditization, see `itmo_commoditization.go`.
+
+### LLM-Assisted Norm Implementation
+For LLM integration, see `llm_integration.py`.
