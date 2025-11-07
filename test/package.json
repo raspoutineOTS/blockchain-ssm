@@ -1,0 +1,34 @@
+{
+  "name": "blockchain-ssm-tests",
+  "version": "2.0.0",
+  "description": "Integration tests for blockchain-ssm with ITMO and DeFi functionality",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha 'integration/**/*_test.js' --timeout 30000",
+    "test:itmo": "mocha 'integration/itmo_integration_test.js' --timeout 30000",
+    "test:defi": "mocha 'integration/defi_integration_test.js' --timeout 30000",
+    "test:coverage": "nyc npm test",
+    "test:watch": "mocha 'integration/**/*_test.js' --watch"
+  },
+  "keywords": [
+    "blockchain",
+    "hyperledger",
+    "fabric",
+    "itmo",
+    "defi",
+    "carbon-credits",
+    "testing"
+  ],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "fabric-network": "^2.2.20",
+    "fabric-ca-client": "^2.2.20"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.10",
+    "nyc": "^15.1.0",
+    "sinon": "^17.0.1"
+  }
+}
