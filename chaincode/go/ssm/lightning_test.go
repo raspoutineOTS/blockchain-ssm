@@ -482,3 +482,323 @@ func BenchmarkConvertITMOToTaprootAsset(b *testing.B) {
 		}
 	}
 }
+
+// TestCreateCompactAnchor tests compact anchor creation
+func TestCreateCompactAnchor(t *testing.T) {
+	state := &State{
+		Session:   "carbon_credit_001",
+		Ssm:       "CarbonCreditLifecycle",
+		Iteration: 42,
+		Limit:     100,
+		Current:   STATE_ACCEPTED,
+		Roles: map[string]string{
+			"Alice": "Seller",
+			"Bob":   "Buyer",
+		},
+		Public: `{"itmo_id": "ITMO-2025-001", "quantity": 500}`,
+		Origin: Transition{
+			From:   STATE_PROPOSED,
+			To:     STATE_ACCEPTED,
+			Role:   "Buyer",
+			Action: "Accept",
+		},
+	}
+
+	sessionCounter := uint16(1)
+
+	anchor, err := CreateCompactAnchor(state, sessionCounter)
+	if err != nil {
+		t.Fatalf("Failed to create compact anchor: %v", err)
+	}
+
+	// Verify hash is generated
+	if anchor.H == "" {
+		t.Error("State hash should not be empty")
+	}
+	if len(anchor.H) != 64 {
+		t.Errorf("State hash should be 64 hex chars, got %d", len(anchor.H))
+	}
+
+	// Verify short session ID
+	if anchor.S == "" {
+		t.Error("Short session ID should not be empty")
+	}
+	if len(anchor.S) != 8 {
+		t.Errorf("Short session ID should be 8 hex chars, got %d", len(anchor.S))
+	}
+
+	// Verify transaction number is encoded
+	if anchor.N == 0 {
+		t.Error("Transaction number should not be zero")
+	}
+
+	// Verify transition code is set
+	if anchor.T == 0 {
+		t.Error("Transition code should not be zero")
+	}
+
+	// Verify timestamp
+	if anchor.TS == 0 {
+		t.Error("Timestamp should be set")
+	}
+}
+
+// TestCompactAnchorVerification tests compact anchor verification
+func TestCompactAnchorVerification(t *testing.T) {
+	state := &State{
+		Session:   "test_session",
+		Ssm:       "TestSSM",
+		Iteration: 10,
+		Current:   STATE_VALIDATED,
+		Roles:     map[string]string{"Agent1": "Initiator"},
+		Public:    "test data",
+		Origin:    Transition{From: 1, To: 2, Role: "Initiator", Action: "Validate"},
+	}
+
+	sessionCounter := uint16(5)
+	anchor, _ := CreateCompactAnchor(state, sessionCounter)
+
+	// Verify anchor matches state
+	valid, err := VerifyCompactAnchor(anchor, state)
+	if err != nil {
+		t.Fatalf("Verification failed: %v", err)
+	}
+	if !valid {
+		t.Error("Anchor should be valid")
+	}
+
+	// Test with modified state (should fail)
+	modifiedState := *state
+	modifiedState.Iteration = 999
+
+	valid, err = VerifyCompactAnchor(anchor, &modifiedState)
+	if err == nil {
+		t.Error("Verification should fail with modified state")
+	}
+	if valid {
+		t.Error("Anchor should not be valid for modified state")
+	}
+}
+
+// TestTransactionNumberEncoding tests transaction number encoding/decoding
+func TestTransactionNumberEncoding(t *testing.T) {
+	sessionCounter := uint16(42)
+	iteration := uint32(1337)
+	state := uint8(STATE_ACCEPTED)
+
+	// Encode
+	txNum := EncodeTransactionNumber(sessionCounter, iteration, state)
+
+	// Decode
+	decodedSession, decodedIter, decodedState, valid := DecodeTransactionNumber(txNum)
+
+	if !valid {
+		t.Error("Transaction number checksum should be valid")
+	}
+
+	if decodedSession != sessionCounter {
+		t.Errorf("Session counter mismatch: expected %d, got %d", sessionCounter, decodedSession)
+	}
+
+	if decodedIter != iteration {
+		t.Errorf("Iteration mismatch: expected %d, got %d", iteration, decodedIter)
+	}
+
+	if decodedState != state {
+		t.Errorf("State mismatch: expected %d, got %d", state, decodedState)
+	}
+}
+
+// TestTransitionEncoding tests transition encoding/decoding
+func TestTransitionEncoding(t *testing.T) {
+	fromState := uint8(STATE_PROPOSED)
+	action := uint8(ACTION_ACCEPT)
+
+	// Encode
+	code := EncodeTransition(fromState, action)
+
+	// Decode
+	decodedFrom, decodedAction := DecodeTransition(code)
+
+	if decodedFrom != fromState {
+		t.Errorf("From state mismatch: expected %d, got %d", fromState, decodedFrom)
+	}
+
+	if decodedAction != action {
+		t.Errorf("Action mismatch: expected %d, got %d", action, decodedAction)
+	}
+}
+
+// TestSpaceSavings tests space savings calculation
+func TestSpaceSavings(t *testing.T) {
+	state := &State{
+		Session:   "large_session_id_with_long_name",
+		Ssm:       "ComplexStateMachine",
+		Iteration: 100,
+		Current:   3,
+		Roles: map[string]string{
+			"Agent1": "Role1",
+			"Agent2": "Role2",
+			"Agent3": "Role3",
+		},
+		Public: `{"large": "json", "with": "lots", "of": "data", "fields": [1, 2, 3, 4, 5]}`,
+		Origin: Transition{From: 2, To: 3, Role: "Role1", Action: "Process"},
+	}
+
+	anchor, _ := CreateCompactAnchor(state, 1)
+
+	fullSize := FullStateSize(state)
+	compactSize := CompactAnchorSize(anchor)
+	savings := CalculateSpaceSavings(state, anchor)
+
+	t.Logf("Full state size: %d bytes", fullSize)
+	t.Logf("Compact anchor size: %d bytes", compactSize)
+	t.Logf("Space savings: %.1f%%", savings)
+
+	// Compact anchor should be significantly smaller
+	if compactSize >= fullSize {
+		t.Error("Compact anchor should be smaller than full state")
+	}
+
+	// Should achieve at least 80% savings
+	if savings < 80.0 {
+		t.Errorf("Expected at least 80%% savings, got %.1f%%", savings)
+	}
+}
+
+// TestLightningInvoiceCreation tests Lightning invoice creation with compact anchor
+func TestLightningInvoiceCreation(t *testing.T) {
+	state := &State{
+		Session:   "invoice_test",
+		Ssm:       "PaymentSSM",
+		Iteration: 5,
+		Current:   STATE_TRANSFERRED,
+		Roles:     map[string]string{"Payer": "Alice", "Payee": "Bob"},
+		Public:    "payment data",
+		Origin:    Transition{From: 3, To: 4, Role: "Payer", Action: "Transfer"},
+	}
+
+	anchor, _ := CreateCompactAnchor(state, 10)
+
+	invoice, err := CreateLightningInvoiceWithCompactAnchor(anchor, 100000, "Carbon credit transfer")
+	if err != nil {
+		t.Fatalf("Failed to create invoice: %v", err)
+	}
+
+	// Verify invoice fields
+	if invoice["amount_msat"] != int64(100000) {
+		t.Error("Invoice amount mismatch")
+	}
+
+	if invoice["description"] != "Carbon credit transfer" {
+		t.Error("Invoice description mismatch")
+	}
+
+	// Verify metadata contains compact anchor
+	metadata, ok := invoice["metadata"].(string)
+	if !ok {
+		t.Error("Invoice metadata should be a string")
+	}
+
+	if len(metadata) == 0 {
+		t.Error("Invoice metadata should not be empty")
+	}
+
+	// Verify we can deserialize the anchor from metadata
+	var parsedAnchor CompactLightningAnchor
+	err = json.Unmarshal([]byte(metadata), &parsedAnchor)
+	if err != nil {
+		t.Errorf("Failed to parse anchor from metadata: %v", err)
+	}
+}
+
+// TestSessionRegistry tests session counter registry
+func TestSessionRegistry(t *testing.T) {
+	registry := NewSessionRegistry()
+
+	// Register sessions
+	counter1, err := registry.RegisterSession("session_001")
+	if err != nil {
+		t.Fatalf("Failed to register session: %v", err)
+	}
+
+	counter2, err := registry.RegisterSession("session_002")
+	if err != nil {
+		t.Fatalf("Failed to register session: %v", err)
+	}
+
+	// Counters should be different
+	if counter1 == counter2 {
+		t.Error("Different sessions should have different counters")
+	}
+
+	// Re-registering same session should return same counter
+	counter1Again, _ := registry.RegisterSession("session_001")
+	if counter1Again != counter1 {
+		t.Error("Re-registering same session should return same counter")
+	}
+
+	// Verify lookup
+	retrievedCounter, exists := registry.GetSessionCounter("session_001")
+	if !exists {
+		t.Error("Session should exist in registry")
+	}
+	if retrievedCounter != counter1 {
+		t.Error("Retrieved counter mismatch")
+	}
+
+	// Verify reverse lookup
+	retrievedSession, exists := registry.GetSessionID(counter1)
+	if !exists {
+		t.Error("Counter should exist in registry")
+	}
+	if retrievedSession != "session_001" {
+		t.Error("Retrieved session ID mismatch")
+	}
+}
+
+// BenchmarkCreateCompactAnchor benchmarks compact anchor creation
+func BenchmarkCreateCompactAnchor(b *testing.B) {
+	state := &State{
+		Session:   "benchmark_session",
+		Ssm:       "BenchmarkSSM",
+		Iteration: 50,
+		Current:   STATE_ACCEPTED,
+		Roles:     map[string]string{"Agent": "Role"},
+		Public:    "benchmark data",
+		Origin:    Transition{From: 1, To: 2, Role: "Role", Action: "Accept"},
+	}
+
+	sessionCounter := uint16(1)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := CreateCompactAnchor(state, sessionCounter)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+// BenchmarkVerifyCompactAnchor benchmarks compact anchor verification
+func BenchmarkVerifyCompactAnchor(b *testing.B) {
+	state := &State{
+		Session:   "verify_benchmark",
+		Ssm:       "VerifySSM",
+		Iteration: 25,
+		Current:   STATE_VALIDATED,
+		Roles:     map[string]string{"Agent": "Validator"},
+		Public:    "verification data",
+		Origin:    Transition{From: 1, To: 2, Role: "Validator", Action: "Validate"},
+	}
+
+	anchor, _ := CreateCompactAnchor(state, 1)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := VerifyCompactAnchor(anchor, state)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
