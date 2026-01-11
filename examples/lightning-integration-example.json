@@ -1,0 +1,204 @@
+{
+  "description": "Example workflow for Lightning Network integration with SSM carbon credits",
+  "workflow": [
+    {
+      "step": 1,
+      "action": "Create ITMO on Hyperledger",
+      "itmo": {
+        "ID": "ITMO-2025-SOLAR-BR-001",
+        "QuantityTonsCO2e": 1000.0,
+        "ProjectType": "Solar Energy",
+        "Methodology": "CDM ACM0002",
+        "CountryOfOrigin": "Brazil",
+        "VintageYear": 2024,
+        "VerificationStatus": "Verified",
+        "AdditionalAttributes": {
+          "verifier": "TUV SUD",
+          "project_id": "CDM-123456",
+          "retirement_eligible": "true"
+        }
+      }
+    },
+    {
+      "step": 2,
+      "action": "Start SSM Session",
+      "ssm_name": "CarbonCreditTransfer",
+      "session_id": "carbon_session_2025_001",
+      "roles": {
+        "ProjectDeveloper": "Alice",
+        "Buyer": "Bob",
+        "Verifier": "TUV_SUD"
+      },
+      "initial_state": 0,
+      "public_data": "{...ITMO JSON from step 1...}"
+    },
+    {
+      "step": 3,
+      "action": "Enable Lightning for Session",
+      "command": "EnableLightningForSession",
+      "parameters": {
+        "session_id": "carbon_session_2025_001",
+        "anchor_policy": "every_transition",
+        "anchor_interval": 5
+      }
+    },
+    {
+      "step": 4,
+      "action": "Anchor Initial State to Bitcoin",
+      "command": "AnchorToLightning",
+      "agent": "Alice",
+      "context": {
+        "session": "carbon_session_2025_001",
+        "iteration": 0
+      },
+      "expected_result": {
+        "session_id": "carbon_session_2025_001",
+        "state_hash": "7a8b9c1d2e3f4a5b6c7d8e9f0a1b2c3d...",
+        "timestamp": 1731168000,
+        "anchor_type": "hash_only",
+        "confirmations": 0
+      }
+    },
+    {
+      "step": 5,
+      "action": "Mint Taproot Asset",
+      "command": "MintTaprootAsset",
+      "agent": "Alice",
+      "context": {
+        "session": "carbon_session_2025_001",
+        "iteration": 0,
+        "public": "{...ITMO JSON...}"
+      },
+      "expected_result": {
+        "taproot_asset_id": "a1b2c3d4e5f6a7b8",
+        "group_key": "solar_cdm_acm0002",
+        "supply_amount": 1000000,
+        "decimals": 3,
+        "metadata_uri": "ipfs://itmo/ITMO-2025-SOLAR-BR-001"
+      }
+    },
+    {
+      "step": 6,
+      "action": "Transfer 100 tCO2e to Bob via Lightning",
+      "command": "TransferViaLightning",
+      "agent": "Alice",
+      "context": {
+        "session": "carbon_session_2025_001",
+        "iteration": 1,
+        "public": "{\"asset_id\": \"a1b2c3d4e5f6a7b8\", \"from_agent\": \"Alice\", \"to_agent\": \"Bob\", \"amount\": 100.0, \"invoice\": \"lnbc100000n1...\"}"
+      },
+      "expected_result": {
+        "payment_hash": "abc123...",
+        "status": "pending",
+        "amount": 100.0,
+        "fees": 50
+      }
+    },
+    {
+      "step": 7,
+      "action": "Verify Lightning Anchor",
+      "command": "VerifyLightningAnchor",
+      "agent": "TUV_SUD",
+      "context": {
+        "session": "carbon_session_2025_001",
+        "iteration": 0
+      },
+      "expected_result": {
+        "session": "carbon_session_2025_001",
+        "iteration": 0,
+        "verified": true,
+        "confirmations": 6
+      }
+    },
+    {
+      "step": 8,
+      "action": "Settle Lightning Transfer to Hyperledger",
+      "command": "SettleFromLightning",
+      "agent": "Alice",
+      "context": {
+        "session": "carbon_session_2025_001",
+        "iteration": 2,
+        "public": "{\"payment_hash\": \"abc123...\", \"preimage\": \"xyz789...\", \"new_owner\": \"Bob\"}"
+      },
+      "expected_result": {
+        "message": "Settled Lightning transfer abc123... to Bob",
+        "new_roles": {
+          "ProjectDeveloper": "Alice",
+          "Buyer": "Bob"
+        }
+      }
+    }
+  ],
+  "lightning_network_setup": {
+    "required_components": [
+      {
+        "component": "Bitcoin Node",
+        "software": "Bitcoin Core",
+        "version": "25.0+",
+        "network": "testnet (for testing) or mainnet (production)"
+      },
+      {
+        "component": "Lightning Node",
+        "software": "LND (Lightning Network Daemon)",
+        "version": "0.17.0+",
+        "config": {
+          "bitcoin.active": true,
+          "bitcoin.testnet": true,
+          "bitcoin.node": "bitcoind",
+          "autopilot.active": true
+        }
+      },
+      {
+        "component": "Taproot Assets Daemon",
+        "software": "tapd",
+        "version": "0.6.0+",
+        "description": "Required for minting and transferring Taproot Assets"
+      },
+      {
+        "component": "Lightning Gateway Service",
+        "description": "REST API bridge between Hyperledger and Lightning Network",
+        "endpoints": [
+          "POST /api/v1/anchor",
+          "POST /api/v1/mint",
+          "POST /api/v1/transfer",
+          "GET /api/v1/verify"
+        ]
+      }
+    ]
+  },
+  "cost_analysis": {
+    "traditional_transfer": {
+      "platform_fee": "$5.00",
+      "settlement_time": "2-5 days",
+      "minimum_amount": "100 tCO2e"
+    },
+    "lightning_transfer": {
+      "bitcoin_anchor": "$3.00 (one-time per batch)",
+      "taproot_mint": "$5.00 (one-time)",
+      "lightning_transfer_fee": "$0.0005 per transfer",
+      "settlement_time": "< 1 second",
+      "minimum_amount": "0.001 tCO2e"
+    },
+    "break_even": "After ~1600 transfers, Lightning becomes cheaper"
+  },
+  "use_cases": {
+    "micropayments": {
+      "scenario": "Consumer buys 0.5 tCO2e to offset monthly carbon footprint",
+      "traditional_cost": "Not viable (minimum 100 tCO2e)",
+      "lightning_cost": "$0.0005 fee + $5 in USDT",
+      "benefit": "Enables retail carbon offset market"
+    },
+    "cross_border": {
+      "scenario": "European company buys credits from Brazilian project",
+      "traditional_cost": "$50 wire transfer + 3 days settlement",
+      "lightning_cost": "$0.0005 + instant settlement",
+      "benefit": "99% cost reduction + instant liquidity"
+    },
+    "fractionalization": {
+      "scenario": "Split 1000 tCO2e among 500 small investors",
+      "traditional_cost": "$2,500 (500 × $5 fee)",
+      "lightning_cost": "$5 mint + $0.25 transfers (500 × $0.0005)",
+      "benefit": "Democratic access to carbon markets"
+    }
+  }
+}
