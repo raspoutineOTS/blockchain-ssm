@@ -1,53 +1,53 @@
-# Plan d'Intégration Lightning Network pour SSM - Crédits Carbone & Impact
+# Lightning Network Integration Plan for SSM - Carbon Credits & Impact
 
-## 🎯 Vision Stratégique
+## 🎯 Strategic Vision
 
-Créer un système hybride permettant d'enregistrer les états de crédits carbone/impact en dehors d'Hyperledger tout en maintenant une empreinte cryptographique sur le Lightning Network via des stablecoins et le protocole Taproot Assets.
+Create a hybrid system enabling carbon/impact credit state registration outside of Hyperledger while maintaining a cryptographic footprint on the Lightning Network via stablecoins and the Taproot Assets protocol.
 
 ---
 
-## 📊 Analyse des Tendances 2025
+## 📊 2025 Trends Analysis
 
-### Tether sur Lightning Network (Janvier 2025)
+### Tether on Lightning Network (January 2025)
 
-**Annonce majeure**: Tether (139.4 milliards USD de capitalisation) a intégré USDT sur Bitcoin et Lightning Network.
+**Major Announcement**: Tether ($139.4 billion market cap) integrated USDT on Bitcoin and Lightning Network.
 
-**Technologie utilisée**:
+**Technology Used**:
 - **Taproot Assets Protocol** (Lightning Labs)
-- Transactions sub-seconde avec frais < $0.001
-- Settlement sur la blockchain Bitcoin + canaux off-chain Lightning
-- Beta Q1 2025, mainnet prévu juin 2025
+- Sub-second transactions with fees < $0.001
+- Settlement on Bitcoin blockchain + off-chain Lightning channels
+- Beta Q1 2025, mainnet planned June 2025
 
 **Impact**:
-- $10T de volume USDT on-chain en 2024 (approche les $16T de Visa)
-- 350 millions d'utilisateurs Tether auront accès à Lightning
-- Nouveau standard pour les actifs tokenisés sur Bitcoin
+- $10T USDT on-chain volume in 2024 (approaching Visa's $16T)
+- 350 million Tether users will have access to Lightning
+- New standard for tokenized assets on Bitcoin
 
-### Taproot Assets v0.6 (Juin 2025)
+### Taproot Assets v0.6 (June 2025)
 
-**Fonctionnalités clés**:
-- Premier protocole multi-assets sur Lightning en production
-- Minting d'assets (stablecoins, tokens) sur Bitcoin
-- Transferts instantanés via Lightning Network
-- `group_key` identifier pour grouper tokens fongibles
-- Support natif des stablecoins
+**Key Features**:
+- First multi-asset protocol on Lightning in production
+- Asset minting (stablecoins, tokens) on Bitcoin
+- Instant transfers via Lightning Network
+- `group_key` identifier for grouping fungible tokens
+- Native stablecoin support
 
 **Alternative**: RGB Protocol
-- Validation côté client
-- Smart contracts exécutés uniquement côté client
-- Blockchain utilisée uniquement pour prévenir le double-spending
-- Soutenu par LNP/BP Association et Bitfinex
+- Client-side validation
+- Smart contracts executed only on client side
+- Blockchain used only to prevent double-spending
+- Supported by LNP/BP Association and Bitfinex
 
 ---
 
-## 🏗️ Architecture Proposée: Système Hybride SSM-Lightning
+## 🏗️ Proposed Architecture: SSM-Lightning Hybrid System
 
-### Principe Fondamental
+### Core Principle
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    LAYER 1: Hyperledger Fabric                  │
-│                  (Registre Principal - SSM States)              │
+│                  (Primary Ledger - SSM States)                  │
 │                                                                 │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
 │  │ SSM State    │  │ ITMO Tokens  │  │ Agents/Roles │         │
@@ -86,138 +86,138 @@ Créer un système hybride permettant d'enregistrer les états de crédits carbo
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Flux de Données
+### Data Flow
 
-1. **États SSM sur Hyperledger** (Source de vérité)
-   - Machines à états signées pour crédits carbone ITMO
-   - Validation complète des transitions
-   - Stockage des métadonnées complètes
+1. **SSM States on Hyperledger** (Source of Truth)
+   - Signed state machines for ITMO carbon credits
+   - Complete transition validation
+   - Full metadata storage
 
-2. **Ancrage sur Bitcoin/Lightning** (Empreinte cryptographique)
-   - Hash de l'état SSM inscrit via OP_RETURN ou Taproot
-   - Preuve d'existence horodatée
-   - Immuabilité garantie par Bitcoin
+2. **Anchoring on Bitcoin/Lightning** (Cryptographic Footprint)
+   - SSM state hash inscribed via OP_RETURN or Taproot
+   - Timestamped proof of existence
+   - Immutability guaranteed by Bitcoin
 
-3. **Tokenisation via Taproot Assets** (Transferts rapides)
-   - Minting de tokens représentant les crédits ITMO
-   - Transferts instantanés sur Lightning Network
-   - Conversion en stablecoins (USDT) pour liquidité
+3. **Tokenization via Taproot Assets** (Fast Transfers)
+   - Minting tokens representing ITMO credits
+   - Instant transfers on Lightning Network
+   - Conversion to stablecoins (USDT) for liquidity
 
 ---
 
-## 💡 Cas d'Usage Principaux
+## 💡 Primary Use Cases
 
-### 1. Enregistrement Hors Hyperledger
+### 1. Off-Hyperledger Registration
 
-**Problème**: Besoin de prouver l'existence d'un crédit carbone sans accès à Hyperledger
+**Problem**: Need to prove carbon credit existence without Hyperledger access
 
-**Solution Lightning**:
+**Lightning Solution**:
 ```
-1. État SSM créé sur Hyperledger:
+1. SSM State created on Hyperledger:
    - ITMO_2025_SOLAR_1000tCO2e
    - Hash: 0x7a8b9c...
 
-2. Ancrage sur Bitcoin via Taproot:
-   - Transaction Bitcoin incluant le hash
+2. Anchoring on Bitcoin via Taproot:
+   - Bitcoin transaction including hash
    - Block: 850,000
    - Timestamp: 2025-11-09 14:30:00 UTC
 
-3. Minting Taproot Asset:
+3. Taproot Asset Minting:
    - Asset ID: itmo_solar_1000
-   - Quantity: 1000 (tokens fongibles)
-   - Lié au hash Hyperledger
+   - Quantity: 1000 (fungible tokens)
+   - Linked to Hyperledger hash
 ```
 
-**Bénéfice**: Preuve cryptographique indépendante d'Hyperledger
+**Benefit**: Independent cryptographic proof from Hyperledger
 
-### 2. Micropaiements pour Crédits Carbone Fractionnés
+### 2. Micropayments for Fractional Carbon Credits
 
-**Scénario**: Vente de 0.5 tCO2e à un particulier
+**Scenario**: Sale of 0.5 tCO2e to an individual
 
-**Flux**:
+**Flow**:
 ```
-1. Crédit ITMO (1000 tCO2e) tokenisé → 1,000,000 unités (0.001 tCO2e/unit)
+1. ITMO Credit (1000 tCO2e) tokenized → 1,000,000 units (0.001 tCO2e/unit)
 
-2. Client achète 500 unités (0.5 tCO2e):
-   - Paiement: 5 USDT via Lightning
-   - Frais: < $0.001
-   - Temps: < 1 seconde
+2. Customer purchases 500 units (0.5 tCO2e):
+   - Payment: 5 USDT via Lightning
+   - Fee: < $0.001
+   - Time: < 1 second
 
-3. Mise à jour SSM sur Hyperledger:
+3. SSM Update on Hyperledger:
    - Transition: Transfer(seller → buyer, 500 units)
-   - État actualisé asynchrone
+   - Asynchronous state update
 ```
 
-**Bénéfice**: Démocratisation des crédits carbone (microachats viables)
+**Benefit**: Democratization of carbon credits (viable micro-purchases)
 
-### 3. Marché Secondaire sur Lightning
+### 3. Secondary Market on Lightning
 
-**Écosystème**:
+**Ecosystem**:
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              Lightning DEX pour Crédits Carbone         │
+│         Lightning DEX for Carbon Credits                │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │  Trading Pair: ITMO/USDT                                │
 │                                                         │
 │  ┌────────────┐         ┌────────────┐                 │
-│  │  Vendeur   │ ──────> │  Acheteur  │                 │
+│  │  Seller    │ ──────> │  Buyer     │                 │
 │  │ 100 ITMO   │ Lightning│   95 USDT  │                 │
 │  │            │ <────── │            │                 │
 │  └────────────┘  Atomic  └────────────┘                 │
 │                   Swap                                  │
 │                                                         │
-│  Settlement: < 1 sec | Frais: $0.0005                   │
+│  Settlement: < 1 sec | Fees: $0.0005                    │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Bénéfice**: Liquidité instantanée + marché 24/7
+**Benefit**: Instant liquidity + 24/7 market
 
-### 4. Vérification Multi-Registres
+### 4. Multi-Registry Verification
 
-**Problème**: Crédits carbone vendus sur plusieurs plateformes (risque de double-counting)
+**Problem**: Carbon credits sold on multiple platforms (double-counting risk)
 
 **Solution**:
 ```
-1. Chaque vente → transaction Lightning avec metadata
-2. Hash de transaction ancré sur Bitcoin
-3. Registre global consultable:
-   - Hyperledger SSM: Statut détaillé
-   - Bitcoin/Lightning: Empreinte immuable
-   - Oracles externes: Vérification croisée
+1. Each sale → Lightning transaction with metadata
+2. Transaction hash anchored on Bitcoin
+3. Global queryable registry:
+   - Hyperledger SSM: Detailed status
+   - Bitcoin/Lightning: Immutable footprint
+   - External oracles: Cross-verification
 ```
 
-**Bénéfice**: Traçabilité inter-plateformes
+**Benefit**: Cross-platform traceability
 
 ---
 
-## 🔧 Composants Techniques à Développer
+## 🔧 Technical Components to Develop
 
-### 1. Module d'Ancrage Bitcoin/Lightning
+### 1. Bitcoin/Lightning Anchoring Module
 
-**Fichier**: `chaincode/go/ssm/lightning-anchor.go`
+**File**: `chaincode/go/ssm/lightning-anchor.go`
 
-**Fonctionnalités**:
+**Features**:
 ```go
 type LightningAnchor struct {
     SessionID       string          // SSM session
-    StateHash       string          // Hash de l'état SSM
-    BitcoinTxID     string          // Transaction ID Bitcoin
+    StateHash       string          // SSM state hash
+    BitcoinTxID     string          // Bitcoin transaction ID
     LightningInvoice string         // Bolt11 invoice
-    TaprootAssetID  string          // ID du Taproot Asset
+    TaprootAssetID  string          // Taproot Asset ID
     Timestamp       int64           // Unix timestamp
 }
 
-// Fonctions principales
+// Main functions
 func AnchorStateOnBitcoin(state *State) (*LightningAnchor, error)
 func MintTaprootAsset(itmo *ITMOCommodity) (*TaprootAsset, error)
 func TransferOnLightning(asset *TaprootAsset, recipient string, amount float64) error
 func VerifyAnchor(anchor *LightningAnchor) (bool, error)
 ```
 
-### 2. Service de Passerelle Lightning
+### 2. Lightning Gateway Service
 
-**Fichier**: `services/lightning-gateway/server.go`
+**File**: `services/lightning-gateway/server.go`
 
 **Architecture**:
 ```
@@ -226,19 +226,19 @@ func VerifyAnchor(anchor *LightningAnchor) (bool, error)
 ├───────────────────────────────────────────────────────────┤
 │                                                           │
 │  /api/v1/anchor                                           │
-│    POST: Ancrer un état SSM sur Bitcoin                   │
+│    POST: Anchor SSM state on Bitcoin                      │
 │                                                           │
 │  /api/v1/mint                                             │
-│    POST: Créer un Taproot Asset pour ITMO                 │
+│    POST: Create Taproot Asset for ITMO                    │
 │                                                           │
 │  /api/v1/transfer                                         │
-│    POST: Transférer tokens via Lightning                  │
+│    POST: Transfer tokens via Lightning                    │
 │                                                           │
 │  /api/v1/verify                                           │
-│    GET: Vérifier une ancre Bitcoin                        │
+│    GET: Verify Bitcoin anchor                             │
 │                                                           │
 │  /api/v1/balance                                          │
-│    GET: Solde Lightning d'un agent                        │
+│    GET: Agent's Lightning balance                         │
 │                                                           │
 └───────────────────────────────────────────────────────────┘
          ↓                    ↓                    ↓
@@ -249,13 +249,13 @@ func VerifyAnchor(anchor *LightningAnchor) (bool, error)
     └─────────┘          └─────────┘          └─────────┘
 ```
 
-### 3. Smart Contract SSM Étendu
+### 3. Extended SSM Smart Contract
 
-**Fichier**: `chaincode/go/ssm/ssm-lightning.go`
+**File**: `chaincode/go/ssm/ssm-lightning.go`
 
-**Nouvelles Transitions**:
+**New Transitions**:
 ```go
-// Transition spéciale: Ancrage Lightning
+// Special transition: Lightning Anchoring
 {
     From: ANY_STATE,
     To: SAME_STATE,
@@ -263,7 +263,7 @@ func VerifyAnchor(anchor *LightningAnchor) (bool, error)
     Action: "AnchorToLightning"
 }
 
-// Transition: Transfert Lightning
+// Transition: Lightning Transfer
 {
     From: STATE_ACTIVE,
     To: STATE_TRANSFERRED,
@@ -271,7 +271,7 @@ func VerifyAnchor(anchor *LightningAnchor) (bool, error)
     Action: "TransferViaLightning"
 }
 
-// Transition: Vérification externe
+// Transition: External Verification
 {
     From: STATE_PENDING,
     To: STATE_VERIFIED,
@@ -280,20 +280,20 @@ func VerifyAnchor(anchor *LightningAnchor) (bool, error)
 }
 ```
 
-### 4. Interface ITMO-Taproot
+### 4. ITMO-Taproot Interface
 
-**Fichier**: `itmo_taproot_bridge.go`
+**File**: `itmo_taproot_bridge.go`
 
 **Mapping**:
 ```go
 type ITMOTaprootAsset struct {
-    ITMOCommodity               // Données ITMO d'origine
-    TaprootAssetID    string    // ID unique Taproot
-    GroupKey          string    // Grouping pour fongibilité
-    MintTxID          string    // Transaction de minting
-    MetadataURI       string    // IPFS/Arweave pour métadonnées
-    SupplyAmount      int64     // Quantité totale mintée
-    Decimals          int       // Précision (ex: 3 = 0.001 tCO2e)
+    ITMOCommodity               // Original ITMO data
+    TaprootAssetID    string    // Unique Taproot ID
+    GroupKey          string    // Grouping for fungibility
+    MintTxID          string    // Minting transaction
+    MetadataURI       string    // IPFS/Arweave for metadata
+    SupplyAmount      int64     // Total minted quantity
+    Decimals          int       // Precision (e.g., 3 = 0.001 tCO2e)
 }
 
 // Conversion
@@ -303,153 +303,153 @@ func SyncTaprootToHyperledger(asset *ITMOTaprootAsset) error
 
 ---
 
-## 🔐 Sécurité et Gouvernance
+## 🔐 Security and Governance
 
-### Modèle de Confiance
+### Trust Model
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Niveau de Confiance                      │
+│                    Trust Level                              │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  1. Hyperledger SSM (Source de vérité)                      │
-│     ├─ Validation complète des états                        │
-│     ├─ Signatures cryptographiques des agents               │
-│     └─ Historique complet des transitions                   │
+│  1. Hyperledger SSM (Source of Truth)                       │
+│     ├─ Complete state validation                            │
+│     ├─ Cryptographic agent signatures                       │
+│     └─ Complete transition history                          │
 │                                                             │
-│  2. Bitcoin Base Layer (Immutabilité)                       │
-│     ├─ Ancres cryptographiques horodatées                   │
-│     ├─ Consensus PoW (sécurité maximale)                    │
-│     └─ Impossibilité de falsification                       │
+│  2. Bitcoin Base Layer (Immutability)                       │
+│     ├─ Timestamped cryptographic anchors                    │
+│     ├─ PoW consensus (maximum security)                     │
+│     └─ Impossible to falsify                                │
 │                                                             │
 │  3. Lightning Network (Performance)                         │
-│     ├─ Canaux bidirectionnels sécurisés                     │
-│     ├─ Atomic swaps (pas de risque de contrepartie)         │
-│     └─ Watchtowers pour surveillance                        │
+│     ├─ Secured bidirectional channels                       │
+│     ├─ Atomic swaps (no counterparty risk)                  │
+│     └─ Watchtowers for monitoring                           │
 │                                                             │
-│  4. Taproot Assets (Tokenisation)                           │
-│     ├─ Protocole open-source vérifié                        │
-│     ├─ Support multi-signatures                             │
-│     └─ Audits cryptographiques                              │
+│  4. Taproot Assets (Tokenization)                           │
+│     ├─ Verified open-source protocol                        │
+│     ├─ Multi-signature support                              │
+│     └─ Cryptographic audits                                 │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Gestion des Conflits
+### Conflict Management
 
-**Scénario**: Divergence entre état Hyperledger et Lightning
+**Scenario**: Divergence between Hyperledger and Lightning states
 
-**Résolution**:
-1. **Hyperledger = Autorité finale** (single source of truth)
-2. Lightning = Cache de performance avec réconciliation périodique
-3. Timestamp Bitcoin pour arbitrage temporel
-4. Procédure de dispute avec freeze automatique
-
----
-
-## 📈 Roadmap d'Implémentation
-
-### Phase 1: Proof of Concept (2 mois)
-- [ ] Setup nœud Lightning (LND) en testnet
-- [ ] Installation Taproot Assets Daemon (tapd)
-- [ ] Ancrage simple: hash SSM → Bitcoin testnet
-- [ ] Premier minting de token ITMO sur testnet
-
-### Phase 2: Intégration SSM (3 mois)
-- [ ] Développement `lightning-anchor.go`
-- [ ] Extension SSM avec transitions Lightning
-- [ ] API Gateway Lightning
-- [ ] Tests d'intégration Hyperledger ↔ Lightning
-
-### Phase 3: Taproot Assets (3 mois)
-- [ ] Mapping ITMO → Taproot Asset
-- [ ] Minting automatisé
-- [ ] Transferts Lightning multi-assets
-- [ ] Interface utilisateur pour wallet
-
-### Phase 4: Production (2 mois)
-- [ ] Migration vers Bitcoin mainnet
-- [ ] Infrastructure redondante (plusieurs nœuds Lightning)
-- [ ] Monitoring et alertes
-- [ ] Documentation complète
-
-### Phase 5: Écosystème (ongoing)
-- [ ] Intégration avec wallets tiers (Phoenix, Breez, etc.)
-- [ ] API publique pour développeurs
-- [ ] Marketplace Lightning pour crédits carbone
-- [ ] Oracles de prix (ITMO/USDT)
+**Resolution**:
+1. **Hyperledger = Final Authority** (single source of truth)
+2. Lightning = Performance cache with periodic reconciliation
+3. Bitcoin timestamp for temporal arbitrage
+4. Dispute procedure with automatic freeze
 
 ---
 
-## 💰 Modèle Économique
+## 📈 Implementation Roadmap
 
-### Frais et Coûts
+### Phase 1: Proof of Concept (2 months)
+- [ ] Setup Lightning node (LND) on testnet
+- [ ] Install Taproot Assets Daemon (tapd)
+- [ ] Simple anchoring: SSM hash → Bitcoin testnet
+- [ ] First ITMO token minting on testnet
 
-| Opération | Hyperledger | Lightning Network | Économie |
-|-----------|-------------|-------------------|----------|
-| Transfert crédit carbone | ~$0.05-0.50 | <$0.001 | >99% |
-| Vérification état | Gratuit | Gratuit | = |
-| Ancrage Bitcoin | N/A | ~$1-5 (tx base layer) | One-time |
-| Minting Taproot Asset | N/A | ~$2-10 | One-time |
+### Phase 2: SSM Integration (3 months)
+- [ ] Develop `lightning-anchor.go`
+- [ ] Extend SSM with Lightning transitions
+- [ ] Lightning Gateway API
+- [ ] Hyperledger ↔ Lightning integration tests
 
-### Nouveaux Revenus Possibles
+### Phase 3: Taproot Assets (3 months)
+- [ ] ITMO → Taproot Asset mapping
+- [ ] Automated minting
+- [ ] Lightning multi-asset transfers
+- [ ] Wallet user interface
 
-1. **Frais de Routing**: 0.1% sur transferts Lightning (ex: 10,000 USDT → $10)
-2. **Services Premium**: API avec SLA pour intégrations externes
-3. **Liquidity Provider**: Revenus sur canaux Lightning
-4. **Oracle Services**: Vérification cross-chain payante
+### Phase 4: Production (2 months)
+- [ ] Migration to Bitcoin mainnet
+- [ ] Redundant infrastructure (multiple Lightning nodes)
+- [ ] Monitoring and alerts
+- [ ] Complete documentation
+
+### Phase 5: Ecosystem (ongoing)
+- [ ] Integration with third-party wallets (Phoenix, Breez, etc.)
+- [ ] Public API for developers
+- [ ] Lightning marketplace for carbon credits
+- [ ] Price oracles (ITMO/USDT)
 
 ---
 
-## 🌍 Impact Environnemental
+## 💰 Economic Model
 
-### Paradoxe à Résoudre
+### Fees and Costs
 
-**Problème**: Bitcoin = forte consommation énergétique
+| Operation | Hyperledger | Lightning Network | Savings |
+|-----------|-------------|-------------------|---------|
+| Carbon credit transfer | ~$0.05-0.50 | <$0.001 | >99% |
+| State verification | Free | Free | = |
+| Bitcoin anchoring | N/A | ~$1-5 (base layer tx) | One-time |
+| Taproot Asset minting | N/A | ~$2-10 | One-time |
 
-**Contre-argument Lightning**:
-- Layer 2 ne mine pas (pas de PoW supplémentaire)
-- Efficacité énergétique par transaction:
+### New Revenue Possibilities
+
+1. **Routing Fees**: 0.1% on Lightning transfers (e.g., 10,000 USDT → $10)
+2. **Premium Services**: API with SLA for external integrations
+3. **Liquidity Provider**: Revenue on Lightning channels
+4. **Oracle Services**: Paid cross-chain verification
+
+---
+
+## 🌍 Environmental Impact
+
+### Paradox to Resolve
+
+**Problem**: Bitcoin = high energy consumption
+
+**Lightning Counter-argument**:
+- Layer 2 doesn't mine (no additional PoW)
+- Energy efficiency per transaction:
   - Bitcoin L1: ~700 kWh/tx
-  - Lightning L2: ~0.0001 kWh/tx (partage du coût PoW)
-- Réduction des transactions inutiles sur autres blockchains
+  - Lightning L2: ~0.0001 kWh/tx (shared PoW cost)
+- Reduction of unnecessary transactions on other blockchains
 
-**Bilan Net**:
-- Utilisation minimale de Bitcoin (seulement pour ancrage périodique)
-- Millions de transactions Lightning pour un seul ancrage Bitcoin
-- Impact carbone amortisé sur volume élevé
+**Net Balance**:
+- Minimal Bitcoin usage (only for periodic anchoring)
+- Millions of Lightning transactions for one Bitcoin anchor
+- Carbon impact amortized over high volume
 
 ---
 
-## 🔬 Recherche et Développement
+## 🔬 Research and Development
 
-### Technologies Émergentes à Surveiller
+### Emerging Technologies to Monitor
 
 1. **RGB v0.11** (2025-2026)
-   - Smart contracts plus complexes sur Bitcoin
-   - Possible alternative à Taproot Assets
+   - More complex smart contracts on Bitcoin
+   - Possible alternative to Taproot Assets
 
 2. **Lightning Pool**
-   - Marché de liquidité pour canaux
-   - Optimisation des frais de routing
+   - Liquidity market for channels
+   - Routing fee optimization
 
 3. **Fedimint**
-   - Custodial federated Lightning
-   - Simplification pour utilisateurs non-techniques
+   - Federated custodial Lightning
+   - Simplification for non-technical users
 
 4. **Ark Protocol**
-   - Alternative à Lightning pour micropaiements
-   - Moins de complexité de gestion de canaux
+   - Alternative to Lightning for micropayments
+   - Less channel management complexity
 
 5. **Mercury Layer**
-   - Statechain pour transferts off-chain instantanés
-   - Complémentaire à Lightning
+   - Statechain for instant off-chain transfers
+   - Complementary to Lightning
 
 ---
 
-## 📚 Références et Ressources
+## 📚 References and Resources
 
-### Documentation Technique
+### Technical Documentation
 
 - **Lightning Labs**: https://lightning.engineering/
 - **Taproot Assets**: https://docs.lightning.engineering/the-lightning-network/taproot-assets
@@ -459,62 +459,62 @@ func SyncTaprootToHyperledger(asset *ITMOTaprootAsset) error
 
 ### Standards
 
-- **BOLT (Basis of Lightning Technology)**: Spécifications Lightning Network
+- **BOLT (Basis of Lightning Technology)**: Lightning Network specifications
 - **BIP 340-342**: Schnorr Signatures & Taproot
-- **ISO 14064**: Standards crédits carbone
-- **ITMO**: Article 6 Accord de Paris
+- **ISO 14064**: Carbon credit standards
+- **ITMO**: Article 6 Paris Agreement
 
-### Outils de Développement
+### Development Tools
 
-- **Polar**: Lightning Network développement local
-- **ThunderHub**: Interface Lightning Node
-- **RTL (Ride The Lightning)**: Web UI pour LND
-- **Lightning Terminal**: Suite complète Lightning Labs
+- **Polar**: Local Lightning Network development
+- **ThunderHub**: Lightning Node interface
+- **RTL (Ride The Lightning)**: Web UI for LND
+- **Lightning Terminal**: Complete Lightning Labs suite
 
 ---
 
-## ✅ Critères de Succès
+## ✅ Success Criteria
 
-### Métriques Techniques
+### Technical Metrics
 
-- [ ] Latence ancrage < 10 secondes
-- [ ] Frais transaction Lightning < $0.001
-- [ ] Uptime service > 99.9%
-- [ ] Support 10,000 tx/sec sur Lightning
+- [ ] Anchoring latency < 10 seconds
+- [ ] Lightning transaction fee < $0.001
+- [ ] Service uptime > 99.9%
+- [ ] Support 10,000 tx/sec on Lightning
 
-### Métriques Business
+### Business Metrics
 
-- [ ] Réduction coûts transactions > 95%
-- [ ] Adoption par 5+ partenaires externes
-- [ ] Volume mensuel > 100,000 tCO2e tokenisés
-- [ ] Liquidité stablecoins > $1M sur Lightning
+- [ ] Transaction cost reduction > 95%
+- [ ] Adoption by 5+ external partners
+- [ ] Monthly volume > 100,000 tCO2e tokenized
+- [ ] Stablecoin liquidity > $1M on Lightning
 
-### Métriques Impact
+### Impact Metrics
 
-- [ ] Démocratisation: Micropaiements < 1 tCO2e viables
-- [ ] Transparence: Vérification publique des ancres
-- [ ] Interopérabilité: 3+ registres connectés
-- [ ] Innovation: 2+ cas d'usage inédits lancés
+- [ ] Democratization: Viable micropayments < 1 tCO2e
+- [ ] Transparency: Public anchor verification
+- [ ] Interoperability: 3+ connected registries
+- [ ] Innovation: 2+ novel use cases launched
 
 ---
 
 ## 🎯 Conclusion
 
-L'intégration du Lightning Network avec le système SSM représente une **évolution majeure** vers un écosystème de crédits carbone:
+Lightning Network integration with the SSM system represents a **major evolution** towards a carbon credit ecosystem that is:
 
-✅ **Décentralisé** (Bitcoin + Lightning)
+✅ **Decentralized** (Bitcoin + Lightning)
 ✅ **Performant** (sub-second, micro-fees)
-✅ **Interopérable** (hors Hyperledger)
-✅ **Transparent** (ancres publiques Bitcoin)
-✅ **Scalable** (millions de tx/jour)
+✅ **Interoperable** (outside Hyperledger)
+✅ **Transparent** (public Bitcoin anchors)
+✅ **Scalable** (millions of tx/day)
 
-En s'inspirant de l'approche Tether/USDT et du protocole Taproot Assets, nous positionnons les **crédits carbone ITMO comme des actifs numériques de première classe** sur l'infrastructure Bitcoin/Lightning, tout en conservant la robustesse et la traçabilité d'Hyperledger Fabric.
+By following the Tether/USDT approach and Taproot Assets protocol, we position **ITMO carbon credits as first-class digital assets** on the Bitcoin/Lightning infrastructure, while maintaining the robustness and traceability of Hyperledger Fabric.
 
 ---
 
-**Prochaine étape**: Développer le PoC (Phase 1) avec un nœud Lightning testnet et le premier ancrage d'état SSM.
+**Next Step**: Develop PoC (Phase 1) with Lightning testnet node and first SSM state anchoring.
 
 **Version**: 1.0
 **Date**: 2025-11-09
-**Auteur**: Plan d'intégration Lightning Network - Blockchain SSM
-**Licence**: Apache-2.0
+**Author**: Lightning Network Integration Plan - Blockchain SSM
+**License**: Apache-2.0

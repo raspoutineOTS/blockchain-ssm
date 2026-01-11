@@ -1,23 +1,23 @@
-# Lightning Network Integration - Guide de Démarrage Rapide
+# Lightning Network Integration - Quick Start Guide
 
 ## 🚀 Introduction
 
-Ce guide vous permet de démarrer rapidement avec l'intégration Lightning Network pour les crédits carbone SSM.
+This guide helps you quickly get started with Lightning Network integration for SSM carbon credits.
 
 ---
 
-## 📋 Prérequis
+## 📋 Prerequisites
 
-### Infrastructure Requise
+### Required Infrastructure
 
-1. **Bitcoin Node** (Testnet pour développement)
+1. **Bitcoin Node** (Testnet for development)
 ```bash
-# Installation Bitcoin Core
+# Install Bitcoin Core
 wget https://bitcoincore.org/bin/bitcoin-core-25.0/bitcoin-25.0-x86_64-linux-gnu.tar.gz
 tar -xvf bitcoin-25.0-x86_64-linux-gnu.tar.gz
 cd bitcoin-25.0/bin
 
-# Configuration testnet
+# Configure testnet
 cat > ~/.bitcoin/bitcoin.conf <<EOF
 testnet=1
 server=1
@@ -28,18 +28,18 @@ zmqpubrawblock=tcp://127.0.0.1:28332
 zmqpubrawtx=tcp://127.0.0.1:28333
 EOF
 
-# Démarrer Bitcoin node
+# Start Bitcoin node
 ./bitcoind -daemon
 ```
 
 2. **LND (Lightning Network Daemon)**
 ```bash
-# Installation LND
+# Install LND
 wget https://github.com/lightningnetwork/lnd/releases/download/v0.17.0/lnd-linux-amd64-v0.17.0.tar.gz
 tar -xvf lnd-linux-amd64-v0.17.0.tar.gz
 cd lnd-linux-amd64-v0.17.0
 
-# Configuration LND
+# Configure LND
 cat > ~/.lnd/lnd.conf <<EOF
 [Application Options]
 alias=SSM-Lightning-Node
@@ -58,23 +58,23 @@ bitcoind.zmqpubrawblock=tcp://127.0.0.1:28332
 bitcoind.zmqpubrawtx=tcp://127.0.0.1:28333
 EOF
 
-# Démarrer LND
+# Start LND
 ./lnd
 ```
 
 3. **Taproot Assets Daemon**
 ```bash
-# Installation tapd
+# Install tapd
 wget https://github.com/lightninglabs/taproot-assets/releases/download/v0.6.0/tapd-linux-amd64-v0.6.0.tar.gz
 tar -xvf tapd-linux-amd64-v0.6.0.tar.gz
 
-# Démarrer tapd (dépend de LND)
+# Start tapd (depends on LND)
 ./tapd --network=testnet
 ```
 
-4. **Hyperledger Fabric** (existant)
+4. **Hyperledger Fabric** (existing)
 ```bash
-# Votre installation Hyperledger existante
+# Your existing Hyperledger installation
 cd deployment/local
 ./bootstrap.sh
 ```
@@ -83,52 +83,52 @@ cd deployment/local
 
 ## 🔧 Configuration
 
-### 1. Créer un Wallet Lightning
+### 1. Create a Lightning Wallet
 
 ```bash
-# Créer wallet LND
+# Create LND wallet
 lncli create
 
-# Obtenir une adresse Bitcoin pour financer le wallet
+# Get a Bitcoin address to fund the wallet
 lncli newaddress p2wkh
 
-# Obtenir des testnet coins
-# Visitez: https://testnet-faucet.mempool.co/
+# Get testnet coins
+# Visit: https://testnet-faucet.mempool.co/
 ```
 
-### 2. Ouvrir un Channel Lightning
+### 2. Open a Lightning Channel
 
 ```bash
-# Se connecter à un peer
+# Connect to a peer
 lncli connect 03xxx...@lightning-node.example.com:9735
 
-# Ouvrir un channel avec 1,000,000 sats
+# Open a channel with 1,000,000 sats
 lncli openchannel --node_key=03xxx... --local_amt=1000000
 ```
 
-### 3. Déployer le Chaincode SSM avec Lightning
+### 3. Deploy SSM Chaincode with Lightning
 
 ```bash
 cd chaincode/go/ssm
 
-# Le chaincode inclut maintenant:
-# - ssm.go (existant)
-# - lightning-anchor.go (nouveau)
-# - ssm-lightning.go (nouveau)
+# Chaincode now includes:
+# - ssm.go (existing)
+# - lightning-anchor.go (new)
+# - ssm-lightning.go (new)
 
-# Installer le chaincode
+# Install chaincode
 peer chaincode install -n ssm -v 2.0 -p ./
 peer chaincode instantiate -n ssm -v 2.0 -C mychannel -c '{"Args":["init"]}'
 ```
 
 ---
 
-## 💻 Exemples d'Utilisation
+## 💻 Usage Examples
 
-### Exemple 1: Créer et Ancrer un Crédit Carbone
+### Example 1: Create and Anchor a Carbon Credit
 
 ```javascript
-// 1. Créer un ITMO
+// 1. Create an ITMO
 const itmo = {
   ID: "ITMO-2025-WIND-DE-001",
   QuantityTonsCO2e: 500.0,
@@ -139,7 +139,7 @@ const itmo = {
   VerificationStatus: "Verified"
 };
 
-// 2. Démarrer une session SSM
+// 2. Start SSM session
 const session = {
   ssm: "CarbonCreditLifecycle",
   session: "wind_germany_001",
@@ -155,23 +155,23 @@ peer.chaincode.invoke({
   args: [JSON.stringify(session), "Alice", signature]
 });
 
-// 3. Activer Lightning pour cette session
+// 3. Enable Lightning for this session
 peer.chaincode.invoke({
   fcn: "enableLightning",
   args: ["wind_germany_001", "every_transition", "0"]
 });
 
-// 4. Ancrer l'état sur Bitcoin
+// 4. Anchor state on Bitcoin
 peer.chaincode.invoke({
   fcn: "perform",
   args: ["AnchorToLightning", JSON.stringify(context), "Alice", signature]
 });
 ```
 
-### Exemple 2: Mint Taproot Asset
+### Example 2: Mint Taproot Asset
 
 ```javascript
-// Minter un Taproot Asset depuis l'ITMO
+// Mint a Taproot Asset from ITMO
 peer.chaincode.invoke({
   fcn: "perform",
   args: [
@@ -186,7 +186,7 @@ peer.chaincode.invoke({
   ]
 });
 
-// Résultat:
+// Result:
 // {
 //   "taproot_asset_id": "f1e2d3c4b5a69788",
 //   "supply_amount": 500000,  // 500.000 units (0.001 tCO2e precision)
@@ -194,17 +194,17 @@ peer.chaincode.invoke({
 // }
 ```
 
-### Exemple 3: Transfert Lightning
+### Example 3: Lightning Transfer
 
 ```bash
-# 1. Générer une invoice Lightning (côté destinataire Bob)
+# 1. Generate Lightning invoice (recipient Bob's side)
 lncli addinvoice --amt_msat=100000 --memo="Carbon credit 0.1 tCO2e"
 
 # Output:
 # payment_request: lnbc1000n1p3xr...
 # payment_hash: abc123def456...
 
-# 2. Enregistrer le transfert dans SSM
+# 2. Record transfer in SSM
 peer.chaincode.invoke({
   fcn: "perform",
   args: [
@@ -225,16 +225,16 @@ peer.chaincode.invoke({
   ]
 });
 
-# 3. Payer l'invoice (côté Alice)
+# 3. Pay invoice (Alice's side)
 lncli payinvoice lnbc1000n1p3xr...
 
-# Transaction complétée en < 1 seconde!
+# Transaction completed in < 1 second!
 ```
 
-### Exemple 4: Vérifier un Ancrage
+### Example 4: Verify an Anchor
 
 ```javascript
-// Vérifier qu'un état a été ancré sur Bitcoin
+// Verify that a state has been anchored on Bitcoin
 peer.chaincode.query({
   fcn: "perform",
   args: [
@@ -248,7 +248,7 @@ peer.chaincode.query({
   ]
 });
 
-// Résultat:
+// Result:
 // {
 //   "session": "wind_germany_001",
 //   "iteration": 0,
@@ -261,51 +261,51 @@ peer.chaincode.query({
 
 ---
 
-## 🔍 Cas d'Usage Complets
+## 🔍 Complete Use Cases
 
-### Cas 1: Marketplace Lightning pour Crédits Carbone
+### Use Case 1: Lightning Marketplace for Carbon Credits
 
 ```javascript
-// Scénario: Une marketplace où les utilisateurs peuvent acheter
-// des fractions de crédits carbone avec des stablecoins
+// Scenario: A marketplace where users can buy
+// fractions of carbon credits with stablecoins
 
-// 1. Vendeur: Minter 1000 tCO2e en Taproot Asset
+// 1. Seller: Mint 1000 tCO2e as Taproot Asset
 const mintResult = await mintTaprootAsset(itmo);
-// → 1,000,000 unités (0.001 tCO2e chacune)
+// → 1,000,000 units (0.001 tCO2e each)
 
-// 2. Acheteur: Acheter 5.5 tCO2e pour 55 USDT
+// 2. Buyer: Purchase 5.5 tCO2e for 55 USDT
 const purchaseInvoice = await generateLightningInvoice({
-  amount_msat: 55000000, // 55 USDT en millisatoshis
+  amount_msat: 55000000, // 55 USDT in millisatoshis
   description: "5.5 tCO2e carbon credits",
   asset_id: mintResult.taproot_asset_id,
   asset_amount: 5500 // 5.5 tCO2e = 5500 units
 });
 
-// 3. Paiement atomique: USDT ↔ Carbon Credits
+// 3. Atomic payment: USDT ↔ Carbon Credits
 const result = await atomicSwap({
   buyer_pays: "55 USDT (via Lightning)",
   seller_delivers: "5.5 tCO2e Taproot Asset",
   invoice: purchaseInvoice
 });
 
-// ✅ Transaction complétée en < 1 sec, frais < $0.001
+// ✅ Transaction completed in < 1 sec, fees < $0.001
 ```
 
-### Cas 2: Traçabilité Multi-Registres
+### Use Case 2: Multi-Registry Traceability
 
 ```javascript
-// Vérifier qu'un crédit n'a pas été vendu ailleurs
+// Verify that a credit hasn't been sold elsewhere
 
-// 1. Consulter Hyperledger SSM
+// 1. Query Hyperledger SSM
 const ssmState = await querySSMSession("wind_germany_001");
 
-// 2. Vérifier l'ancrage Bitcoin
+// 2. Verify Bitcoin anchor
 const bitcoinAnchor = await verifyBitcoinAnchor(
   ssmState.session,
   ssmState.iteration
 );
 
-// 3. Consulter registres externes via oracles
+// 3. Query external registries via oracles
 const externalRegistries = [
   "Verra",
   "Gold Standard",
@@ -318,7 +318,7 @@ const verifications = await Promise.all(
   )
 );
 
-// 4. Résultat consolidé
+// 4. Consolidated result
 const report = {
   itmo_id: itmo.ID,
   ssm_status: ssmState.current,
@@ -331,41 +331,41 @@ const report = {
 
 ---
 
-## 📊 Monitoring et Observabilité
+## 📊 Monitoring and Observability
 
-### Dashboard Lightning Node
+### Lightning Node Dashboard
 
 ```bash
-# Installer RTL (Ride The Lightning)
+# Install RTL (Ride The Lightning)
 npm install -g rtl
 
-# Configurer RTL
+# Configure RTL
 rtl --lnnode=LND --configpath=/home/user/.lnd
 
-# Accéder au dashboard
+# Access dashboard
 # http://localhost:3000
 ```
 
-### Métriques Importantes
+### Important Metrics
 
 ```javascript
-// 1. Statut du node Lightning
+// 1. Lightning node status
 lncli getinfo
 
-// 2. Channels actifs
+// 2. Active channels
 lncli listchannels
 
 // 3. Balance
 lncli walletbalance
 lncli channelbalance
 
-// 4. Historique des paiements
+// 4. Payment history
 lncli listpayments
 
-// 5. Taproot Assets mintés
+// 5. Minted Taproot Assets
 tapcli assets list
 
-// 6. Anchors SSM
+// 6. SSM Anchors
 peer.chaincode.query({
   fcn: "queryAnchorsBySession",
   args: ["wind_germany_001"]
@@ -376,23 +376,23 @@ peer.chaincode.query({
 
 ## 🛠️ Troubleshooting
 
-### Problème: Lightning channel fermé
+### Problem: Lightning channel closed
 
 ```bash
-# Vérifier les channels
+# Check channels
 lncli listchannels
 
-# Réouvrir un channel
+# Reopen a channel
 lncli openchannel --node_key=03xxx... --local_amt=1000000
 ```
 
-### Problème: Taproot Asset mint échoue
+### Problem: Taproot Asset mint fails
 
 ```bash
-# Vérifier que tapd est connecté à LND
+# Verify tapd is connected to LND
 tapcli getinfo
 
-# Vérifier le wallet LND
+# Check LND wallet
 lncli walletbalance
 
 # Re-sync tapd
@@ -400,56 +400,56 @@ tapcli stop
 tapcli start --network=testnet
 ```
 
-### Problème: Anchor Bitcoin non confirmé
+### Problem: Bitcoin anchor not confirmed
 
 ```bash
-# Vérifier le mempool
+# Check mempool
 bitcoin-cli getrawmempool
 
-# Augmenter les frais (RBF)
+# Increase fees (RBF)
 bitcoin-cli bumpfee <txid>
 ```
 
 ---
 
-## 🔐 Sécurité
+## 🔐 Security
 
 ### Best Practices
 
-1. **Clés Privées**
-   - Utilisez Hardware Security Modules (HSM) pour les clés LND
-   - Backup encrypted des seeds LND
+1. **Private Keys**
+   - Use Hardware Security Modules (HSM) for LND keys
+   - Encrypted backup of LND seeds
 
 2. **Watchtowers**
    ```bash
-   # Activer watchtower pour surveillance 24/7
+   # Enable watchtower for 24/7 monitoring
    lncli tower info
    lncli wtclient add <tower_pubkey>@<tower_host>
    ```
 
 3. **Multi-signatures**
-   - Exiger plusieurs signatures pour mints > 1000 tCO2e
-   - Utiliser MuSig2 pour signatures agrégées
+   - Require multiple signatures for mints > 1000 tCO2e
+   - Use MuSig2 for aggregated signatures
 
 4. **Audit Trails**
-   - Tous les anchors sont publics sur Bitcoin
-   - Logs immuables sur Hyperledger
-   - Vérification cross-chain systématique
+   - All anchors are public on Bitcoin
+   - Immutable logs on Hyperledger
+   - Systematic cross-chain verification
 
 ---
 
-## 📚 Ressources
+## 📚 Resources
 
 ### Documentation
-- [Plan d'Intégration Complet](./LIGHTNING_NETWORK_INTEGRATION_PLAN.md)
-- [Exemple JSON](./examples/lightning-integration-example.json)
+- [Complete Integration Plan](./LIGHTNING_NETWORK_INTEGRATION_PLAN.md)
+- [JSON Examples](./examples/lightning-integration-example.json)
 - [LND Documentation](https://docs.lightning.engineering/)
 - [Taproot Assets Guide](https://docs.lightning.engineering/the-lightning-network/taproot-assets)
 
-### Outils
-- [Polar](https://lightningpolar.com/) - Réseau Lightning local
-- [ThunderHub](https://www.thunderhub.io/) - Interface web LND
-- [Mempool.space](https://mempool.space/testnet) - Explorateur Bitcoin testnet
+### Tools
+- [Polar](https://lightningpolar.com/) - Local Lightning network
+- [ThunderHub](https://www.thunderhub.io/) - LND web interface
+- [Mempool.space](https://mempool.space/testnet) - Bitcoin testnet explorer
 
 ### Support
 - GitHub Issues: [blockchain-ssm/issues](https://github.com/blockchain-ssm/issues)
@@ -457,23 +457,23 @@ bitcoin-cli bumpfee <txid>
 
 ---
 
-## ✅ Checklist de Production
+## ✅ Production Checklist
 
-Avant de déployer en production:
+Before deploying to production:
 
-- [ ] Bitcoin mainnet node configuré et synchronisé
-- [ ] LND node avec plusieurs channels (redondance)
-- [ ] Watchtowers configurés (min. 2)
-- [ ] Backup automatisé des clés LND
-- [ ] Monitoring avec alertes (Prometheus + Grafana)
-- [ ] Tests de charge (1000+ tx/sec)
-- [ ] Audit de sécurité externe
-- [ ] Documentation interne complète
-- [ ] Formation de l'équipe ops
-- [ ] Plan de disaster recovery
+- [ ] Bitcoin mainnet node configured and synced
+- [ ] LND node with multiple channels (redundancy)
+- [ ] Watchtowers configured (min. 2)
+- [ ] Automated LND key backups
+- [ ] Monitoring with alerts (Prometheus + Grafana)
+- [ ] Load testing (1000+ tx/sec)
+- [ ] External security audit
+- [ ] Complete internal documentation
+- [ ] Ops team training
+- [ ] Disaster recovery plan
 
 ---
 
 **Version**: 1.0
-**Dernière mise à jour**: 2025-11-09
-**Auteur**: Blockchain SSM Lightning Integration Team
+**Last Updated**: 2025-11-09
+**Author**: Blockchain SSM Lightning Integration Team
